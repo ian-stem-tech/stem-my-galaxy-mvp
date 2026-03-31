@@ -1,5 +1,6 @@
 const CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID as string;
-const REDIRECT_URI = `${window.location.origin}/callback`;
+const BASE_PATH = import.meta.env.BASE_URL || '/';
+const REDIRECT_URI = `${window.location.origin}${BASE_PATH}callback`;
 const SCOPES = 'user-top-read user-read-recently-played';
 const AUTH_URL = 'https://accounts.spotify.com/authorize';
 const TOKEN_URL = 'https://accounts.spotify.com/api/token';
