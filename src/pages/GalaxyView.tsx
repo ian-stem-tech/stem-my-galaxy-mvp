@@ -262,22 +262,33 @@ const GalaxyView: React.FC = () => {
       }}>
         <div style={{ pointerEvents: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
           {isNaming ? (
-            <input
-              ref={nameInputRef}
-              type="text"
-              value={nameInput}
-              onChange={(e) => setNameInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleSaveName(); if (e.key === 'Escape') setIsNaming(false); }}
-              onBlur={handleSaveName}
-              maxLength={40}
-              style={{
-                fontSize: 18, fontWeight: 600, letterSpacing: '-0.01em',
-                color: 'rgba(255,255,255,0.85)', background: 'none', border: 'none',
-                borderBottom: '1px solid rgba(255,255,255,0.3)',
-                outline: 'none', padding: '0 0 2px 0', width: 'auto',
-                minWidth: 80, maxWidth: 260,
-              }}
-            />
+            <>
+              <input
+                ref={nameInputRef}
+                type="text"
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleSaveName(); if (e.key === 'Escape') setIsNaming(false); }}
+                onBlur={handleSaveName}
+                maxLength={40}
+                style={{
+                  fontSize: 18, fontWeight: 600, letterSpacing: '-0.01em',
+                  color: 'rgba(255,255,255,0.85)', background: 'none', border: 'none',
+                  borderBottom: '1px solid rgba(255,255,255,0.3)',
+                  outline: 'none', padding: '0 0 2px 0', width: 'auto',
+                  minWidth: 80, maxWidth: 260,
+                }}
+              />
+              <button
+                onMouseDown={(e) => { e.preventDefault(); handleSaveName(); }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, flexShrink: 0 }}
+                title="Save"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(100,220,100,0.8)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              </button>
+            </>
           ) : (
             <h1
               onClick={handleStartNaming}
