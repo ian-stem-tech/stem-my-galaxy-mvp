@@ -274,10 +274,10 @@ const GalaxyView: React.FC = () => {
         </div>
       </div>
 
-      {/* Constellation name -- subtle bottom-left */}
+      {/* Constellation name -- subtle bottom-left, above info button */}
       {!loading && starSignName && (
         <div style={{
-          position: 'fixed', bottom: 24, left: 24, zIndex: 15,
+          position: 'fixed', bottom: 68, left: 24, zIndex: 15,
           fontSize: 11, color: 'rgba(255,255,255,0.2)',
           letterSpacing: '0.1em', textTransform: 'uppercase' as const,
           fontWeight: 400, pointerEvents: 'none',
