@@ -284,7 +284,7 @@ const GalaxyView: React.FC = () => {
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, flexShrink: 0 }}
                 title="Save"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(100,220,100,0.8)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </button>
