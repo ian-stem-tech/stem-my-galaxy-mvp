@@ -118,56 +118,98 @@ const GalaxyView: React.FC = () => {
     setIsNaming(false);
   }, [nameInput]);
 
-  const handleDownload = useCallback(() => {
-    const canvas = galaxyRef.current?.querySelector('canvas');
-    if (!canvas) return;
+  const handleDownload = useCallback(async () => {
+    const container = galaxyRef.current;
+    if (!container) return;
+    const glCanvas = container.querySelector('canvas');
+    if (!glCanvas) return;
 
-    // Create story-format canvas (1080x1920)
+    const W = 1080, H = 1920;
     const storyCanvas = document.createElement('canvas');
-    storyCanvas.width = 1080;
-    storyCanvas.height = 1920;
+    storyCanvas.width = W; storyCanvas.height = H;
     const ctx = storyCanvas.getContext('2d');
     if (!ctx) return;
 
     ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, 1080, 1920);
+    ctx.fillRect(0, 0, W, H);
 
-    // Draw the WebGL canvas scaled to fit
-    const srcAspect = canvas.width / canvas.height;
-    const dstW = 1080;
+    // Draw star field (WebGL canvas)
+    const srcAspect = glCanvas.width / glCanvas.height;
+    const dstW = W;
     const dstH = dstW / srcAspect;
-    const yOffset = (1920 - dstH) / 2;
-    ctx.drawImage(canvas, 0, yOffset, dstW, dstH);
+    const yOff = (H - dstH) / 2;
+    ctx.drawImage(glCanvas, 0, yOff, dstW, dstH);
 
-    // Overlay constellation name
+    // Scale factor from screen to story canvas
+    const screenW = container.clientWidth;
+    const screenH = container.clientHeight;
+    const sx = dstW / screenW;
+    const sy = dstH / screenH;
+
+    // Draw constellation lines from SVG
+    const svgLines = container.querySelectorAll('.galaxy-constellation-line');
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = 'rgba(255,255,255,0.15)';
+    ctx.shadowBlur = 6;
+    svgLines.forEach((line) => {
+      const x1 = Number(line.getAttribute('x1')) * sx;
+      const y1 = Number(line.getAttribute('y1')) * sy + yOff;
+      const x2 = Number(line.getAttribute('x2')) * sx;
+      const y2 = Number(line.getAttribute('y2')) * sy + yOff;
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    });
+    ctx.shadowBlur = 0;
+
+    // Draw album art circles
+    const imgs = container.querySelectorAll('.galaxy-art-item') as NodeListOf<HTMLImageElement>;
+    const drawPromises: Promise<void>[] = [];
+    imgs.forEach((img) => {
+      const left = parseFloat(img.style.left);
+      const top = parseFloat(img.style.top);
+      const size = parseFloat(img.style.width);
+      const cx = left * sx;
+      const cy = top * sy + yOff;
+      const r = (size * sx) / 2;
+
+      drawPromises.push(new Promise<void>((resolve) => {
+        if (!img.complete || !img.naturalWidth) { resolve(); return; }
+        ctx.save();
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.clip();
+        ctx.drawImage(img, cx - r, cy - r, r * 2, r * 2);
+        ctx.restore();
+        // White border
+        ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+        resolve();
+      }));
+    });
+    await Promise.all(drawPromises);
+
+    // Text overlays
     ctx.fillStyle = 'rgba(255,255,255,0.85)';
     ctx.font = '600 48px -apple-system, BlinkMacSystemFont, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(constellationName || 'My Galaxy', 540, 140);
+    ctx.fillText(constellationName || 'My Galaxy', W / 2, 140);
 
     if (starSignName) {
-      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
       ctx.font = '400 28px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillText(starSignName, 540, 190);
+      ctx.fillText(starSignName, W / 2, 190);
     }
-
     if (tasteResult) {
-      ctx.fillStyle = 'rgba(255,255,255,0.3)';
-      ctx.font = '400 24px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.fillText(tasteResult.insight, 540, 1800);
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.font = '400 22px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.fillText(tasteResult.insight, W / 2, H - 120);
     }
 
     const dataUrl = storyCanvas.toDataURL('image/png');
     const blob = dataURLToBlob(dataUrl);
 
-    // Try native share (iOS → IG Stories as share target)
     if (navigator.share && navigator.canShare?.({ files: [new File([blob], 'my-galaxy.png', { type: 'image/png' })] })) {
-      navigator.share({
-        title: constellationName || 'My Galaxy',
-        files: [new File([blob], 'my-galaxy.png', { type: 'image/png' })],
-      }).catch(() => {
-        downloadBlob(blob, `${constellationName || 'my-galaxy'}.png`);
-      });
+      navigator.share({ title: constellationName || 'My Galaxy', files: [new File([blob], 'my-galaxy.png', { type: 'image/png' })] })
+        .catch(() => downloadBlob(blob, `${constellationName || 'my-galaxy'}.png`));
     } else {
       downloadBlob(blob, `${constellationName || 'my-galaxy'}.png`);
     }
@@ -190,8 +232,11 @@ const GalaxyView: React.FC = () => {
 
       {error && !loading && (
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', zIndex: 100 }}>
-          <p style={{ color: 'rgba(255,150,150,0.9)', fontSize: 14, marginBottom: 16 }}>{error}</p>
-          <button onClick={loadTracks} style={{ padding: '8px 20px', borderRadius: 50, border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: '#fff', fontSize: 13, cursor: 'pointer' }}>Retry</button>
+          <p style={{ color: 'rgba(255,150,150,0.9)', fontSize: 14, marginBottom: 16, maxWidth: 320, textAlign: 'center' }}>{error}</p>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button onClick={loadTracks} style={{ padding: '8px 20px', borderRadius: 50, border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: '#fff', fontSize: 13, cursor: 'pointer' }}>Retry</button>
+            <button onClick={handleDisconnect} style={{ padding: '8px 20px', borderRadius: 50, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: 'rgba(255,255,255,0.5)', fontSize: 13, cursor: 'pointer' }}>Start Over</button>
+          </div>
         </div>
       )}
 
@@ -279,13 +324,17 @@ const GalaxyView: React.FC = () => {
         </div>
       )}
 
-      {/* Bottom-right action bar */}
-      <div style={{ position: 'absolute', bottom: 20, right: 20, zIndex: 20, display: 'flex', flexDirection: 'row', gap: 10 }}>
+      {/* Bottom-left info button */}
+      <div style={{ position: 'absolute', bottom: 20, left: 20, zIndex: 20 }}>
         <button style={glassBtn} onClick={() => setShowInsight(true)} onMouseEnter={applyHover} onMouseLeave={removeHover} title="Listening insight">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
           </svg>
         </button>
+      </div>
+
+      {/* Bottom-right action bar */}
+      <div style={{ position: 'absolute', bottom: 20, right: 20, zIndex: 20, display: 'flex', flexDirection: 'row', gap: 10 }}>
         <button style={glassBtn} onClick={() => window.open('https://tiktok.com', '_blank')} onMouseEnter={applyHover} onMouseLeave={removeHover} title="TikTok">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)">
             <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.51a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V9.05a8.27 8.27 0 0 0 4.76 1.5V7.12a4.83 4.83 0 0 1-1-.43z"/>
