@@ -204,14 +204,27 @@ const GalaxyView: React.FC = () => {
       ctx.fillText(tasteResult.insight, W / 2, H - 120);
     }
 
-    const dataUrl = storyCanvas.toDataURL('image/png');
-    const blob = dataURLToBlob(dataUrl);
+    const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-    if (navigator.share && navigator.canShare?.({ files: [new File([blob], 'my-galaxy.png', { type: 'image/png' })] })) {
-      navigator.share({ title: constellationName || 'My Galaxy', files: [new File([blob], 'my-galaxy.png', { type: 'image/png' })] })
-        .catch(() => downloadBlob(blob, `${constellationName || 'my-galaxy'}.png`));
-    } else {
-      downloadBlob(blob, `${constellationName || 'my-galaxy'}.png`);
+    try {
+      const blob = await new Promise<Blob>((resolve) => {
+        storyCanvas.toBlob((b) => resolve(b || new Blob()), 'image/png');
+      });
+      const file = new File([blob], 'my-galaxy.png', { type: 'image/png' });
+
+      if (isMobileDevice && navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ title: constellationName || 'My Galaxy', files: [file] });
+      } else if (isMobileDevice) {
+        // Mobile fallback: open image in new tab for long-press save
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      } else {
+        downloadBlob(blob, `${constellationName || 'my-galaxy'}.png`);
+      }
+    } catch {
+      // Last resort: open as data URL
+      const dataUrl = storyCanvas.toDataURL('image/png');
+      window.open(dataUrl, '_blank');
     }
   }, [constellationName, starSignName, tasteResult]);
 
