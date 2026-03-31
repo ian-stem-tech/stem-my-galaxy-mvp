@@ -1,0 +1,215 @@
+.galaxy-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+
+  canvas {
+    display: block;
+    touch-action: none;
+    width: 100%;
+    height: 100%;
+  }
+
+  &__vignette {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.6) 100%);
+    z-index: 1;
+  }
+}
+
+.galaxy-constellation-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+  overflow: visible;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+
+  &--visible {
+    opacity: 1;
+  }
+}
+
+.galaxy-constellation-line {
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 0.8;
+  filter: url(#glow);
+}
+
+.galaxy-art-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.galaxy-art-item {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  object-fit: cover;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.1);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+
+  &:hover {
+    transform: translate(-50%, -50%) scale(1.4);
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    z-index: 5;
+  }
+
+  &--selected {
+    transform: translate(-50%, -50%) scale(1.8);
+    box-shadow: 0 0 24px rgba(255, 255, 255, 0.4);
+    border-color: rgba(255, 255, 255, 0.6);
+    z-index: 10;
+  }
+}
+
+.galaxy-track-label {
+  position: absolute;
+  z-index: 12;
+  transform: translateY(-50%);
+  padding: 12px 16px;
+  background: rgba(20, 20, 20, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 12px;
+  transition: opacity 0.2s ease;
+  max-width: 320px;
+  white-space: nowrap;
+  touch-action: none;
+
+  &__title {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__artist {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.3;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__album {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.3;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  &__btn {
+    appearance: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    transition: background 0.15s ease, opacity 0.15s ease;
+    background: rgba(29, 185, 84, 0.9);
+    color: #fff;
+
+    &:hover {
+      background: rgba(29, 185, 84, 1);
+    }
+
+    &:active {
+      background: rgba(29, 185, 84, 0.7);
+    }
+  }
+}
+
+// Dark matter nodes
+.galaxy-dm-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.25;
+  transition: opacity 0.2s ease;
+  animation: dm-pulse 3s ease-in-out infinite;
+  pointer-events: auto;
+
+  &:hover {
+    opacity: 0.5;
+  }
+}
+
+@keyframes dm-pulse {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.35; }
+}
+
+.galaxy-dm-tooltip {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 20;
+  padding: 8px 16px;
+  border-radius: 50px;
+  background: rgba(15, 15, 18, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: auto;
+  cursor: pointer;
+  animation: pill-in 0.3s ease both;
+}
+
+@keyframes pill-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
