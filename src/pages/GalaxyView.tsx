@@ -235,7 +235,7 @@ const GalaxyView: React.FC = () => {
           <p style={{ color: 'rgba(255,150,150,0.9)', fontSize: 14, marginBottom: 16, maxWidth: 320, textAlign: 'center' }}>{error}</p>
           <div style={{ display: 'flex', gap: 10 }}>
             <button onClick={loadTracks} style={{ padding: '8px 20px', borderRadius: 50, border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: '#fff', fontSize: 13, cursor: 'pointer' }}>Retry</button>
-            <button onClick={handleDisconnect} style={{ padding: '8px 20px', borderRadius: 50, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: 'rgba(255,255,255,0.5)', fontSize: 13, cursor: 'pointer' }}>Start Over</button>
+            <button onClick={handleDisconnect} style={{ padding: '8px 20px', borderRadius: 50, border: '1px solid rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.08)', color: '#fff', fontSize: 13, cursor: 'pointer' }}>Start Over</button>
           </div>
         </div>
       )}
@@ -273,18 +273,6 @@ const GalaxyView: React.FC = () => {
           }}>Disconnect</button>
         </div>
       </div>
-
-      {/* Constellation name -- subtle bottom-left, above info button */}
-      {!loading && starSignName && (
-        <div style={{
-          position: 'fixed', bottom: 68, left: 24, zIndex: 15,
-          fontSize: 11, color: 'rgba(255,255,255,0.2)',
-          letterSpacing: '0.1em', textTransform: 'uppercase' as const,
-          fontWeight: 400, pointerEvents: 'none',
-        }}>
-          {starSignName}
-        </div>
-      )}
 
       {/* Insight pill -- bottom center, above social icons */}
       {showInsight && tasteResult && (
@@ -324,12 +312,26 @@ const GalaxyView: React.FC = () => {
         </div>
       )}
 
-      {/* Bottom-left info button */}
+      {/* Bottom-left info button with constellation name */}
       <div style={{ position: 'absolute', bottom: 20, left: 20, zIndex: 20 }}>
-        <button style={glassBtn} onClick={() => setShowInsight(true)} onMouseEnter={applyHover} onMouseLeave={removeHover} title="Listening insight">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <button
+          style={{
+            ...glassBtn,
+            width: 'auto', height: 'auto',
+            padding: '8px 14px',
+            borderRadius: 50,
+            gap: 6, fontSize: 11, color: 'rgba(255,255,255,0.45)',
+            letterSpacing: '0.05em', textTransform: 'uppercase' as const,
+          }}
+          onClick={() => setShowInsight(true)}
+          onMouseEnter={applyHover}
+          onMouseLeave={removeHover}
+          title="Listening insight"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
           </svg>
+          {starSignName && <span>{starSignName}</span>}
         </button>
       </div>
 
