@@ -260,22 +260,47 @@ const GalaxyView: React.FC = () => {
         padding: '14px 20px', zIndex: 20, pointerEvents: 'none',
         background: 'rgba(0,0,0,0.8)',
       }}>
-        <div style={{ pointerEvents: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <h1 style={{ fontSize: 18, fontWeight: 600, letterSpacing: '-0.01em', color: 'rgba(255,255,255,0.85)' }}>
-            {constellationName || 'My Galaxy'}
-          </h1>
-          <button
-            onClick={handleStartNaming}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, opacity: 0.4, transition: 'opacity 0.2s' }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = '0.8'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = '0.4'; }}
-            title="Rename constellation"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <div style={{ pointerEvents: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+          {isNaming ? (
+            <input
+              ref={nameInputRef}
+              type="text"
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSaveName(); if (e.key === 'Escape') setIsNaming(false); }}
+              onBlur={handleSaveName}
+              maxLength={40}
+              style={{
+                fontSize: 18, fontWeight: 600, letterSpacing: '-0.01em',
+                color: 'rgba(255,255,255,0.85)', background: 'none', border: 'none',
+                borderBottom: '1px solid rgba(255,255,255,0.3)',
+                outline: 'none', padding: '0 0 2px 0', width: 'auto',
+                minWidth: 80, maxWidth: 260,
+              }}
+            />
+          ) : (
+            <h1
+              onClick={handleStartNaming}
+              style={{
+                fontSize: 18, fontWeight: 600, letterSpacing: '-0.01em',
+                color: 'rgba(255,255,255,0.85)', cursor: 'text',
+              }}
+              title="Tap to rename"
+            >
+              {constellationName || 'My Galaxy'}
+            </h1>
+          )}
+          {!isNaming && (
+            <svg
+              onClick={handleStartNaming}
+              width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)"
+              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+              style={{ cursor: 'pointer', flexShrink: 0 }}
+            >
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
             </svg>
-          </button>
+          )}
         </div>
         <div style={{ pointerEvents: 'auto' }}>
           <button onClick={handleDisconnect} style={{
@@ -367,26 +392,6 @@ const GalaxyView: React.FC = () => {
         </button>
       </div>
 
-      {/* Naming overlay */}
-      {isNaming && (
-        <div style={{
-          position: 'absolute', inset: 0, zIndex: 50,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
-        }} onClick={(e) => { if (e.target === e.currentTarget) setIsNaming(false); }}>
-          <div style={{ background: 'rgba(15,15,20,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: '32px 40px', textAlign: 'center', maxWidth: 400 }}>
-            <h2 style={{ color: '#fff', fontSize: 20, fontWeight: 600, marginBottom: 8 }}>Rename Your Galaxy</h2>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13, marginBottom: 24 }}>Give your constellation a name</p>
-            <input ref={nameInputRef} type="text" value={nameInput} onChange={(e) => setNameInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') handleSaveName(); }}
-              placeholder="e.g. Midnight Orbit" maxLength={40}
-              style={{ width: '100%', padding: '12px 16px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 16, outline: 'none', textAlign: 'center', boxSizing: 'border-box' }} />
-            <div style={{ display: 'flex', gap: 8, marginTop: 20, justifyContent: 'center' }}>
-              <button onClick={handleSaveName} style={{ padding: '10px 28px', borderRadius: 50, border: 'none', background: 'rgba(255,255,255,0.9)', color: '#000', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>Save</button>
-              <button onClick={() => setIsNaming(false)} style={{ padding: '10px 28px', borderRadius: 50, border: '1px solid rgba(255,255,255,0.15)', background: 'transparent', color: 'rgba(255,255,255,0.5)', fontSize: 14, cursor: 'pointer' }}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
