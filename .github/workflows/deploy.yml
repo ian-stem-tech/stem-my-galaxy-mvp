@@ -30,7 +30,7 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          VITE_SPOTIFY_CLIENT_ID: ${{ secrets.VITE_SPOTIFY_CLIENT_ID }}
+          VITE_SPOTIFY_CLIENT_ID: "0510ac2819aa4cceb2f8597996a8d420"
 
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
